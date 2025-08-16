@@ -875,7 +875,6 @@ ExplodeBox:AddSlider("ExplodeDelay", {
     Min = 0.05,
     Max = 1,
     Rounding = 2,
-    Compact = false,
 }):OnChanged(function(val)
     ExplodeDelay = val
 end)
@@ -926,18 +925,23 @@ local function ExplodeAt(pos)
     end
 end
 
-local MouseDown = false
+local TouchDown = false
+local TouchPosition = Vector2.new()
 
 UserInputService.InputBegan:Connect(function(input)
-    if Enabled and input.UserInputType == Enum.UserInputType.MouseButton1 then
-        MouseDown = true
+    if Enabled and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1) then
+        TouchDown = true
+        TouchPosition = input.Position
+
         if ClickMode == "CLICK" then
-            local pos = Mouse.Hit.Position
+            local ray = workspace.CurrentCamera:ScreenPointToRay(TouchPosition.X, TouchPosition.Y)
+            local pos = ray.Origin + ray.Direction * 50
             ExplodeAt(pos)
         elseif ClickMode == "LOOP" then
             spawn(function()
-                while MouseDown and Enabled do
-                    local pos = Mouse.Hit.Position
+                while TouchDown and Enabled do
+                    local ray = workspace.CurrentCamera:ScreenPointToRay(TouchPosition.X, TouchPosition.Y)
+                    local pos = ray.Origin + ray.Direction * 50
                     ExplodeAt(pos)
                     task.wait(ExplodeDelay)
                 end
@@ -946,11 +950,18 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        MouseDown = false
+UserInputService.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch and TouchDown then
+        TouchPosition = input.Position
     end
 end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        TouchDown = false
+    end
+end)
+
 
 local VisualsEx = Tabs["Visuals"]:AddLeftGroupbox("ESP")
 
