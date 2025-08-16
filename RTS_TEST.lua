@@ -1,3 +1,9 @@
+local UIS = game:GetService("UserInputService")
+if UIS.TouchEnabled and not UIS.MouseEnabled and not UIS.KeyboardEnabled then
+    getgenv().bypass_adonis = true
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/FakeAngles/RobloxSolutions/refs/heads/main/RTS_TEST_MOBILE.lua'))() return
+end
+
 if not game:IsLoaded() then 
     game.Loaded:Wait()
 end
